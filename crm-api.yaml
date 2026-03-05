@@ -1,0 +1,1273 @@
+openapi: 3.0.3
+info:
+  title: CRM API
+  description: |
+    A Customer Relationship Management (CRM) REST API providing full CRUD operations
+    for managing contacts, companies, deals, and activities.
+  version: 1.0.0
+  contact:
+    name: CRM API Support
+    email: support@crm-example.com
+
+servers:
+  - url: https://api.crm-example.com/v1
+    description: Production
+  - url: https://staging.api.crm-example.com/v1
+    description: Staging
+
+tags:
+  - name: Contacts
+    description: Manage individual customer contacts
+  - name: Companies
+    description: Manage company/account records
+  - name: Deals
+    description: Manage sales deals and opportunities
+  - name: Activities
+    description: Manage tasks, calls, emails, and meetings
+
+security:
+  - BearerAuth: []
+
+paths:
+
+  # ─── CONTACTS ────────────────────────────────────────────────────────────────
+
+  /contacts:
+    get:
+      tags: [Contacts]
+      summary: List all contacts
+      operationId: listContacts
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+        - name: search
+          in: query
+          description: Full-text search across name and email
+          schema:
+            type: string
+        - name: company_id
+          in: query
+          description: Filter by associated company
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Paginated list of contacts
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContactList'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    post:
+      tags: [Contacts]
+      summary: Create a contact
+      operationId: createContact
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContactInput'
+            example:
+              first_name: Jane
+              last_name: Doe
+              email: jane.doe@example.com
+              phone: "+14155550101"
+              company_id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+              job_title: VP of Engineering
+      responses:
+        '201':
+          description: Contact created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Contact'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /contacts/{contactId}:
+    parameters:
+      - $ref: '#/components/parameters/ContactId'
+
+    get:
+      tags: [Contacts]
+      summary: Get a contact
+      operationId: getContact
+      responses:
+        '200':
+          description: Contact record
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Contact'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    put:
+      tags: [Contacts]
+      summary: Replace a contact
+      operationId: replaceContact
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContactInput'
+      responses:
+        '200':
+          description: Updated contact
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Contact'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    patch:
+      tags: [Contacts]
+      summary: Partially update a contact
+      operationId: updateContact
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContactPatch'
+      responses:
+        '200':
+          description: Updated contact
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Contact'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      tags: [Contacts]
+      summary: Delete a contact
+      operationId: deleteContact
+      responses:
+        '204':
+          description: Contact deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ─── COMPANIES ───────────────────────────────────────────────────────────────
+
+  /companies:
+    get:
+      tags: [Companies]
+      summary: List all companies
+      operationId: listCompanies
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+        - name: industry
+          in: query
+          schema:
+            type: string
+            enum: [technology, finance, healthcare, retail, manufacturing, other]
+      responses:
+        '200':
+          description: Paginated list of companies
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompanyList'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    post:
+      tags: [Companies]
+      summary: Create a company
+      operationId: createCompany
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompanyInput'
+            example:
+              name: Acme Corp
+              domain: acme.com
+              industry: technology
+              employee_count: 500
+              annual_revenue: 25000000
+              address:
+                street: 123 Main St
+                city: San Francisco
+                state: CA
+                postal_code: "94105"
+                country: US
+      responses:
+        '201':
+          description: Company created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Company'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /companies/{companyId}:
+    parameters:
+      - $ref: '#/components/parameters/CompanyId'
+
+    get:
+      tags: [Companies]
+      summary: Get a company
+      operationId: getCompany
+      responses:
+        '200':
+          description: Company record
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Company'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    put:
+      tags: [Companies]
+      summary: Replace a company
+      operationId: replaceCompany
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompanyInput'
+      responses:
+        '200':
+          description: Updated company
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Company'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    patch:
+      tags: [Companies]
+      summary: Partially update a company
+      operationId: updateCompany
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompanyPatch'
+      responses:
+        '200':
+          description: Updated company
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Company'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      tags: [Companies]
+      summary: Delete a company
+      operationId: deleteCompany
+      responses:
+        '204':
+          description: Company deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ─── DEALS ───────────────────────────────────────────────────────────────────
+
+  /deals:
+    get:
+      tags: [Deals]
+      summary: List all deals
+      operationId: listDeals
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+        - name: stage
+          in: query
+          schema:
+            type: string
+            enum: [prospecting, qualification, proposal, negotiation, closed_won, closed_lost]
+        - name: owner_id
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: company_id
+          in: query
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Paginated list of deals
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DealList'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    post:
+      tags: [Deals]
+      summary: Create a deal
+      operationId: createDeal
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DealInput'
+            example:
+              name: Acme Corp - Enterprise License
+              amount: 120000
+              currency: USD
+              stage: proposal
+              close_date: "2026-06-30"
+              contact_id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+              company_id: "3fa85f64-5717-4562-b3fc-2c963f66afa7"
+              probability: 60
+      responses:
+        '201':
+          description: Deal created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Deal'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /deals/{dealId}:
+    parameters:
+      - $ref: '#/components/parameters/DealId'
+
+    get:
+      tags: [Deals]
+      summary: Get a deal
+      operationId: getDeal
+      responses:
+        '200':
+          description: Deal record
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Deal'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    put:
+      tags: [Deals]
+      summary: Replace a deal
+      operationId: replaceDeal
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DealInput'
+      responses:
+        '200':
+          description: Updated deal
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Deal'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    patch:
+      tags: [Deals]
+      summary: Partially update a deal
+      operationId: updateDeal
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DealPatch'
+      responses:
+        '200':
+          description: Updated deal
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Deal'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      tags: [Deals]
+      summary: Delete a deal
+      operationId: deleteDeal
+      responses:
+        '204':
+          description: Deal deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ─── ACTIVITIES ──────────────────────────────────────────────────────────────
+
+  /activities:
+    get:
+      tags: [Activities]
+      summary: List all activities
+      operationId: listActivities
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [call, email, meeting, task, note]
+        - name: contact_id
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: deal_id
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: due_before
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: due_after
+          in: query
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: Paginated list of activities
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActivityList'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    post:
+      tags: [Activities]
+      summary: Create an activity
+      operationId: createActivity
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActivityInput'
+            example:
+              type: call
+              subject: Follow-up call with Jane
+              body: Discussed renewal pricing and timeline.
+              due_at: "2026-03-10T14:00:00Z"
+              contact_id: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+              deal_id: "3fa85f64-5717-4562-b3fc-2c963f66afa8"
+              status: pending
+      responses:
+        '201':
+          description: Activity created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Activity'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /activities/{activityId}:
+    parameters:
+      - $ref: '#/components/parameters/ActivityId'
+
+    get:
+      tags: [Activities]
+      summary: Get an activity
+      operationId: getActivity
+      responses:
+        '200':
+          description: Activity record
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Activity'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    put:
+      tags: [Activities]
+      summary: Replace an activity
+      operationId: replaceActivity
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActivityInput'
+      responses:
+        '200':
+          description: Updated activity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Activity'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    patch:
+      tags: [Activities]
+      summary: Partially update an activity
+      operationId: updateActivity
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActivityPatch'
+      responses:
+        '200':
+          description: Updated activity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Activity'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      tags: [Activities]
+      summary: Delete an activity
+      operationId: deleteActivity
+      responses:
+        '204':
+          description: Activity deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+# ─── COMPONENTS ──────────────────────────────────────────────────────────────
+
+components:
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    PageParam:
+      name: page
+      in: query
+      description: Page number (1-based)
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+
+    LimitParam:
+      name: limit
+      in: query
+      description: Number of records per page
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+
+    ContactId:
+      name: contactId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+    CompanyId:
+      name: companyId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+    DealId:
+      name: dealId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+    ActivityId:
+      name: activityId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+  # ── Schemas ────────────────────────────────────────────────────────────────
+
+  schemas:
+
+    # Shared
+    Timestamps:
+      type: object
+      readOnly: true
+      properties:
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+          example: 1
+        limit:
+          type: integer
+          example: 20
+        total:
+          type: integer
+          example: 142
+        total_pages:
+          type: integer
+          example: 8
+
+    Address:
+      type: object
+      properties:
+        street:
+          type: string
+          example: 123 Main St
+        city:
+          type: string
+          example: San Francisco
+        state:
+          type: string
+          example: CA
+        postal_code:
+          type: string
+          example: "94105"
+        country:
+          type: string
+          example: US
+          description: ISO 3166-1 alpha-2 country code
+
+    # ── Contact ──────────────────────────────────────────────────────────────
+
+    ContactInput:
+      type: object
+      required: [first_name, last_name, email]
+      properties:
+        first_name:
+          type: string
+          maxLength: 100
+          example: Jane
+        last_name:
+          type: string
+          maxLength: 100
+          example: Doe
+        email:
+          type: string
+          format: email
+          example: jane.doe@example.com
+        phone:
+          type: string
+          example: "+14155550101"
+        company_id:
+          type: string
+          format: uuid
+          nullable: true
+        job_title:
+          type: string
+          maxLength: 150
+          example: VP of Engineering
+        address:
+          $ref: '#/components/schemas/Address'
+        tags:
+          type: array
+          items:
+            type: string
+          example: [vip, decision-maker]
+        notes:
+          type: string
+          example: Met at SaaStr 2025.
+
+    ContactPatch:
+      type: object
+      properties:
+        first_name:
+          type: string
+          maxLength: 100
+        last_name:
+          type: string
+          maxLength: 100
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        company_id:
+          type: string
+          format: uuid
+          nullable: true
+        job_title:
+          type: string
+          maxLength: 150
+        address:
+          $ref: '#/components/schemas/Address'
+        tags:
+          type: array
+          items:
+            type: string
+        notes:
+          type: string
+
+    Contact:
+      allOf:
+        - type: object
+          required: [id]
+          properties:
+            id:
+              type: string
+              format: uuid
+              readOnly: true
+              example: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+        - $ref: '#/components/schemas/ContactInput'
+        - $ref: '#/components/schemas/Timestamps'
+
+    ContactList:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Contact'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    # ── Company ──────────────────────────────────────────────────────────────
+
+    CompanyInput:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+          maxLength: 200
+          example: Acme Corp
+        domain:
+          type: string
+          example: acme.com
+        industry:
+          type: string
+          enum: [technology, finance, healthcare, retail, manufacturing, other]
+          example: technology
+        employee_count:
+          type: integer
+          minimum: 1
+          example: 500
+        annual_revenue:
+          type: number
+          format: double
+          example: 25000000
+        address:
+          $ref: '#/components/schemas/Address'
+        tags:
+          type: array
+          items:
+            type: string
+          example: [enterprise, strategic]
+        notes:
+          type: string
+
+    CompanyPatch:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 200
+        domain:
+          type: string
+        industry:
+          type: string
+          enum: [technology, finance, healthcare, retail, manufacturing, other]
+        employee_count:
+          type: integer
+          minimum: 1
+        annual_revenue:
+          type: number
+          format: double
+        address:
+          $ref: '#/components/schemas/Address'
+        tags:
+          type: array
+          items:
+            type: string
+        notes:
+          type: string
+
+    Company:
+      allOf:
+        - type: object
+          required: [id]
+          properties:
+            id:
+              type: string
+              format: uuid
+              readOnly: true
+              example: "3fa85f64-5717-4562-b3fc-2c963f66afa7"
+        - $ref: '#/components/schemas/CompanyInput'
+        - $ref: '#/components/schemas/Timestamps'
+
+    CompanyList:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Company'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    # ── Deal ─────────────────────────────────────────────────────────────────
+
+    DealInput:
+      type: object
+      required: [name, stage]
+      properties:
+        name:
+          type: string
+          maxLength: 200
+          example: Acme Corp - Enterprise License
+        amount:
+          type: number
+          format: double
+          minimum: 0
+          example: 120000
+        currency:
+          type: string
+          default: USD
+          example: USD
+          description: ISO 4217 currency code
+        stage:
+          type: string
+          enum: [prospecting, qualification, proposal, negotiation, closed_won, closed_lost]
+          example: proposal
+        probability:
+          type: integer
+          minimum: 0
+          maximum: 100
+          example: 60
+          description: Likelihood of closing (%)
+        close_date:
+          type: string
+          format: date
+          example: "2026-06-30"
+        contact_id:
+          type: string
+          format: uuid
+          nullable: true
+        company_id:
+          type: string
+          format: uuid
+          nullable: true
+        owner_id:
+          type: string
+          format: uuid
+          nullable: true
+          description: CRM user responsible for this deal
+        notes:
+          type: string
+
+    DealPatch:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 200
+        amount:
+          type: number
+          format: double
+          minimum: 0
+        currency:
+          type: string
+        stage:
+          type: string
+          enum: [prospecting, qualification, proposal, negotiation, closed_won, closed_lost]
+        probability:
+          type: integer
+          minimum: 0
+          maximum: 100
+        close_date:
+          type: string
+          format: date
+        contact_id:
+          type: string
+          format: uuid
+          nullable: true
+        company_id:
+          type: string
+          format: uuid
+          nullable: true
+        owner_id:
+          type: string
+          format: uuid
+          nullable: true
+        notes:
+          type: string
+
+    Deal:
+      allOf:
+        - type: object
+          required: [id]
+          properties:
+            id:
+              type: string
+              format: uuid
+              readOnly: true
+              example: "3fa85f64-5717-4562-b3fc-2c963f66afa8"
+        - $ref: '#/components/schemas/DealInput'
+        - $ref: '#/components/schemas/Timestamps'
+
+    DealList:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Deal'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    # ── Activity ─────────────────────────────────────────────────────────────
+
+    ActivityInput:
+      type: object
+      required: [type, subject]
+      properties:
+        type:
+          type: string
+          enum: [call, email, meeting, task, note]
+          example: call
+        subject:
+          type: string
+          maxLength: 255
+          example: Follow-up call with Jane
+        body:
+          type: string
+          example: Discussed renewal pricing and timeline.
+        status:
+          type: string
+          enum: [pending, completed, cancelled]
+          default: pending
+        due_at:
+          type: string
+          format: date-time
+          example: "2026-03-10T14:00:00Z"
+        completed_at:
+          type: string
+          format: date-time
+          nullable: true
+        contact_id:
+          type: string
+          format: uuid
+          nullable: true
+        company_id:
+          type: string
+          format: uuid
+          nullable: true
+        deal_id:
+          type: string
+          format: uuid
+          nullable: true
+        owner_id:
+          type: string
+          format: uuid
+          nullable: true
+
+    ActivityPatch:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [call, email, meeting, task, note]
+        subject:
+          type: string
+          maxLength: 255
+        body:
+          type: string
+        status:
+          type: string
+          enum: [pending, completed, cancelled]
+        due_at:
+          type: string
+          format: date-time
+        completed_at:
+          type: string
+          format: date-time
+          nullable: true
+        contact_id:
+          type: string
+          format: uuid
+          nullable: true
+        company_id:
+          type: string
+          format: uuid
+          nullable: true
+        deal_id:
+          type: string
+          format: uuid
+          nullable: true
+        owner_id:
+          type: string
+          format: uuid
+          nullable: true
+
+    Activity:
+      allOf:
+        - type: object
+          required: [id]
+          properties:
+            id:
+              type: string
+              format: uuid
+              readOnly: true
+              example: "3fa85f64-5717-4562-b3fc-2c963f66afa9"
+        - $ref: '#/components/schemas/ActivityInput'
+        - $ref: '#/components/schemas/Timestamps'
+
+    ActivityList:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Activity'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    # ── Errors ───────────────────────────────────────────────────────────────
+
+    Error:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          example: NOT_FOUND
+        message:
+          type: string
+          example: The requested resource was not found.
+        details:
+          type: array
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+              issue:
+                type: string
+
+  # ── Responses ──────────────────────────────────────────────────────────────
+
+  responses:
+    BadRequest:
+      description: Bad request — malformed JSON or missing required fields
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: BAD_REQUEST
+            message: "Request body is invalid."
+
+    Unauthorized:
+      description: Missing or invalid authentication token
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: UNAUTHORIZED
+            message: "Authentication token is missing or expired."
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: NOT_FOUND
+            message: "The requested resource was not found."
+
+    UnprocessableEntity:
+      description: Validation errors on the request body
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: VALIDATION_ERROR
+            message: "One or more fields failed validation."
+            details:
+              - field: email
+                issue: Must be a valid email address.
+              - field: close_date
+                issue: Must be a future date.
+
+    InternalServerError:
+      description: Unexpected server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: INTERNAL_SERVER_ERROR
+            message: "An unexpected error occurred. Please try again later."
