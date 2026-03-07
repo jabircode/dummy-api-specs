@@ -3,7 +3,7 @@
   "info": {
     "title": "CRM API",
     "description": "A Customer Relationship Management (CRM) REST API providing full CRUD operations\nfor managing contacts, companies, deals, activities, and products.\n",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "contact": {
       "name": "CRM API Support",
       "email": "support@crm-example.com"
@@ -76,6 +76,32 @@
             "schema": {
               "type": "string",
               "format": "uuid"
+            }
+          },
+          {
+            "name": "sort_by",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "created_at",
+                "updated_at",
+                "last_name",
+                "email"
+              ],
+              "default": "created_at"
+            }
+          },
+          {
+            "name": "sort_order",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "default": "desc"
             }
           }
         ],
@@ -317,6 +343,8 @@
                 "healthcare",
                 "retail",
                 "manufacturing",
+                "education",
+                "real_estate",
                 "other"
               ]
             }
@@ -597,6 +625,32 @@
                 "high",
                 "critical"
               ]
+            }
+          },
+          {
+            "name": "sort_by",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "created_at",
+                "updated_at",
+                "amount",
+                "close_date"
+              ],
+              "default": "created_at"
+            }
+          },
+          {
+            "name": "sort_order",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "default": "desc"
             }
           }
         ],
@@ -1549,6 +1603,18 @@
             "type": "string",
             "format": "uri",
             "example": "https://linkedin.com/in/janedoe"
+          },
+          "twitter_url": {
+            "type": "string",
+            "format": "uri",
+            "example": "https://twitter.com/janedoe"
+          },
+          "lead_score": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100,
+            "description": "Lead quality score (0\u2013100)",
+            "example": 72
           }
         }
       },
@@ -1594,6 +1660,15 @@
           "linkedin_url": {
             "type": "string",
             "format": "uri"
+          },
+          "twitter_url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "lead_score": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100
           }
         }
       },
@@ -1658,6 +1733,8 @@
               "healthcare",
               "retail",
               "manufacturing",
+              "education",
+              "real_estate",
               "other"
             ],
             "example": "technology"
@@ -1713,6 +1790,8 @@
               "healthcare",
               "retail",
               "manufacturing",
+              "education",
+              "real_estate",
               "other"
             ]
           },
@@ -1853,6 +1932,19 @@
             ],
             "default": "medium",
             "example": "high"
+          },
+          "lost_reason": {
+            "type": "string",
+            "enum": [
+              "price",
+              "competitor",
+              "no_budget",
+              "no_decision",
+              "timing",
+              "other"
+            ],
+            "nullable": true,
+            "description": "Reason for losing the deal (set when stage is closed_lost)"
           }
         }
       },
@@ -1917,6 +2009,18 @@
               "high",
               "critical"
             ]
+          },
+          "lost_reason": {
+            "type": "string",
+            "enum": [
+              "price",
+              "competitor",
+              "no_budget",
+              "no_decision",
+              "timing",
+              "other"
+            ],
+            "nullable": true
           }
         }
       },
@@ -1990,6 +2094,7 @@
             "type": "string",
             "enum": [
               "pending",
+              "in_progress",
               "completed",
               "cancelled"
             ],
@@ -2052,6 +2157,7 @@
             "type": "string",
             "enum": [
               "pending",
+              "in_progress",
               "completed",
               "cancelled"
             ]
@@ -2224,6 +2330,15 @@
             "default": 0,
             "description": "Discount applied to unit_price (%)",
             "example": 10
+          },
+          "tax_rate": {
+            "type": "number",
+            "format": "double",
+            "minimum": 0,
+            "maximum": 100,
+            "default": 0,
+            "description": "Applicable tax rate (%)",
+            "example": 8.5
           }
         }
       },
@@ -2272,6 +2387,12 @@
             "type": "boolean"
           },
           "discount_percent": {
+            "type": "number",
+            "format": "double",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "tax_rate": {
             "type": "number",
             "format": "double",
             "minimum": 0,
