@@ -2,8 +2,8 @@
   "openapi": "3.0.3",
   "info": {
     "title": "CRM API",
-    "description": "A Customer Relationship Management (CRM) REST API providing full CRUD operations\nfor managing contacts, companies, deals, and activities.\n",
-    "version": "1.0.0",
+    "description": "A Customer Relationship Management (CRM) REST API providing full CRUD operations\nfor managing contacts, companies, deals, activities, and products.\n",
+    "version": "1.1.0",
     "contact": {
       "name": "CRM API Support",
       "email": "support@crm-example.com"
@@ -584,6 +584,19 @@
             "schema": {
               "type": "string",
               "format": "uuid"
+            }
+          },
+          {
+            "name": "priority",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "low",
+                "medium",
+                "high",
+                "critical"
+              ]
             }
           }
         ],
@@ -1531,6 +1544,11 @@
           "notes": {
             "type": "string",
             "example": "Met at SaaStr 2025."
+          },
+          "linkedin_url": {
+            "type": "string",
+            "format": "uri",
+            "example": "https://linkedin.com/in/janedoe"
           }
         }
       },
@@ -1572,6 +1590,10 @@
           },
           "notes": {
             "type": "string"
+          },
+          "linkedin_url": {
+            "type": "string",
+            "format": "uri"
           }
         }
       },
@@ -1665,6 +1687,11 @@
           },
           "notes": {
             "type": "string"
+          },
+          "website": {
+            "type": "string",
+            "format": "uri",
+            "example": "https://acme.com"
           }
         }
       },
@@ -1815,6 +1842,17 @@
           },
           "notes": {
             "type": "string"
+          },
+          "priority": {
+            "type": "string",
+            "enum": [
+              "low",
+              "medium",
+              "high",
+              "critical"
+            ],
+            "default": "medium",
+            "example": "high"
           }
         }
       },
@@ -1870,6 +1908,15 @@
           },
           "notes": {
             "type": "string"
+          },
+          "priority": {
+            "type": "string",
+            "enum": [
+              "low",
+              "medium",
+              "high",
+              "critical"
+            ]
           }
         }
       },
@@ -1925,7 +1972,8 @@
               "email",
               "meeting",
               "task",
-              "note"
+              "note",
+              "demo"
             ],
             "example": "call"
           },
@@ -1989,7 +2037,8 @@
               "email",
               "meeting",
               "task",
-              "note"
+              "note",
+              "demo"
             ]
           },
           "subject": {
@@ -2166,6 +2215,15 @@
             "type": "boolean",
             "default": true,
             "example": true
+          },
+          "discount_percent": {
+            "type": "number",
+            "format": "double",
+            "minimum": 0,
+            "maximum": 100,
+            "default": 0,
+            "description": "Discount applied to unit_price (%)",
+            "example": 10
           }
         }
       },
@@ -2212,6 +2270,12 @@
           },
           "active": {
             "type": "boolean"
+          },
+          "discount_percent": {
+            "type": "number",
+            "format": "double",
+            "minimum": 0,
+            "maximum": 100
           }
         }
       },
