@@ -129,7 +129,7 @@
           "Contacts"
         ],
         "summary": "Create a contact",
-        "operationId": "createContact",
+        "operationId": "create_contact",
         "requestBody": {
           "required": true,
           "content": {
