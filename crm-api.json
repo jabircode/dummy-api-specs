@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.3",
+  "openapi": "3.0.4",
   "info": {
     "title": "CRM API",
     "description": "A Customer Relationship Management (CRM) REST API providing full CRUD operations\nfor managing contacts, companies, deals, and activities.\n",
@@ -106,7 +106,8 @@
                 "B",
                 "C",
                 "D",
-                "F"
+                "F",
+                "G"
               ]
             }
           }
