@@ -3,7 +3,7 @@
   "info": {
     "title": "CRM API",
     "description": "A Customer Relationship Management (CRM) REST API providing full CRUD operations\nfor managing contacts, companies, deals, and activities.\n",
-    "version": "1.3.0",
+    "version": "1.4.0",
     "contact": {
       "name": "CRM API Support",
       "email": "support@crm-example.com"
@@ -94,6 +94,20 @@
                 "desc"
               ],
               "default": "desc"
+            }
+          },
+          {
+            "name": "lead_grade",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "A",
+                "B",
+                "C",
+                "D",
+                "F"
+              ]
             }
           }
         ],
@@ -644,6 +658,24 @@
               ],
               "default": "desc"
             }
+          },
+          {
+            "name": "min_amount",
+            "in": "query",
+            "description": "Minimum deal amount filter",
+            "schema": {
+              "type": "number",
+              "format": "double"
+            }
+          },
+          {
+            "name": "max_amount",
+            "in": "query",
+            "description": "Maximum deal amount filter",
+            "schema": {
+              "type": "number",
+              "format": "double"
+            }
           }
         ],
         "responses": {
@@ -1043,17 +1075,17 @@
             "format": "uri",
             "example": "https://linkedin.com/in/janedoe"
           },
-          "twitter_url": {
+          "lead_grade": {
             "type": "string",
-            "format": "uri",
-            "example": "https://twitter.com/janedoe"
-          },
-          "lead_score": {
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 100,
-            "description": "Lead quality score (0\u2013100)",
-            "example": 72
+            "enum": [
+              "A",
+              "B",
+              "C",
+              "D",
+              "F"
+            ],
+            "description": "Lead quality grade",
+            "example": "B"
           }
         }
       },
@@ -1100,14 +1132,15 @@
             "type": "string",
             "format": "uri"
           },
-          "twitter_url": {
+          "lead_grade": {
             "type": "string",
-            "format": "uri"
-          },
-          "lead_score": {
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 100
+            "enum": [
+              "A",
+              "B",
+              "C",
+              "D",
+              "F"
+            ]
           }
         }
       },
@@ -1208,6 +1241,14 @@
             "type": "string",
             "format": "uri",
             "example": "https://acme.com"
+          },
+          "phone": {
+            "type": "string",
+            "example": "+14155550100"
+          },
+          "description": {
+            "type": "string",
+            "example": "Leading provider of enterprise solutions."
           }
         }
       },
@@ -1252,6 +1293,12 @@
             }
           },
           "notes": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "description": {
             "type": "string"
           }
         }
@@ -1371,19 +1418,6 @@
             ],
             "default": "medium",
             "example": "high"
-          },
-          "lost_reason": {
-            "type": "string",
-            "enum": [
-              "price",
-              "competitor",
-              "no_budget",
-              "no_decision",
-              "timing",
-              "other"
-            ],
-            "nullable": true,
-            "description": "Reason for losing the deal (set when stage is closed_lost)"
           }
         }
       },
@@ -1448,18 +1482,6 @@
               "high",
               "critical"
             ]
-          },
-          "lost_reason": {
-            "type": "string",
-            "enum": [
-              "price",
-              "competitor",
-              "no_budget",
-              "no_decision",
-              "timing",
-              "other"
-            ],
-            "nullable": true
           }
         }
       },
